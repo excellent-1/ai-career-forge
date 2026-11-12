@@ -1,0 +1,5 @@
+AI Software Engineer — Fictional Plano Portfolio Example
+Required: Python, FastAPI, SQL, and LangGraph.
+Preferred: Docker, AWS, and TypeScript.
+Build source-grounded applications with RAG and MCP.
+Salary and work arrangement are not specified in this synthetic example.

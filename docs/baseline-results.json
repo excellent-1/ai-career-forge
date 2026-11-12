@@ -1,0 +1,79 @@
+{
+  "scope": "8 synthetic smoke cases; documented challenge failures are outside this benchmark",
+  "cases": [
+    {
+      "id": "explicit-required",
+      "expected": 2,
+      "predicted": 2,
+      "skill_precision": 1.0,
+      "skill_recall": 1.0,
+      "exact_skill_priority_match": true,
+      "quotes_valid": true
+    },
+    {
+      "id": "preferred",
+      "expected": 2,
+      "predicted": 2,
+      "skill_precision": 1.0,
+      "skill_recall": 1.0,
+      "exact_skill_priority_match": true,
+      "quotes_valid": true
+    },
+    {
+      "id": "mention",
+      "expected": 1,
+      "predicted": 1,
+      "skill_precision": 1.0,
+      "skill_recall": 1.0,
+      "exact_skill_priority_match": true,
+      "quotes_valid": true
+    },
+    {
+      "id": "java-boundary",
+      "expected": 1,
+      "predicted": 1,
+      "skill_precision": 1.0,
+      "skill_recall": 1.0,
+      "exact_skill_priority_match": true,
+      "quotes_valid": true
+    },
+    {
+      "id": "no-known-skills",
+      "expected": 0,
+      "predicted": 0,
+      "skill_precision": 1.0,
+      "skill_recall": 1.0,
+      "exact_skill_priority_match": true,
+      "quotes_valid": true
+    },
+    {
+      "id": "mcp-alias",
+      "expected": 1,
+      "predicted": 1,
+      "skill_precision": 1.0,
+      "skill_recall": 1.0,
+      "exact_skill_priority_match": true,
+      "quotes_valid": true
+    },
+    {
+      "id": "csharp",
+      "expected": 1,
+      "predicted": 1,
+      "skill_precision": 1.0,
+      "skill_recall": 1.0,
+      "exact_skill_priority_match": true,
+      "quotes_valid": true
+    },
+    {
+      "id": "optional",
+      "expected": 1,
+      "predicted": 1,
+      "skill_precision": 1.0,
+      "skill_recall": 1.0,
+      "exact_skill_priority_match": true,
+      "quotes_valid": true
+    }
+  ],
+  "exact_matches": 8,
+  "total": 8
+}

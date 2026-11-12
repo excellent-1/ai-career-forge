@@ -1,0 +1,85 @@
+[
+  {
+    "id": "explicit-required",
+    "text": "Required: Python and FastAPI.",
+    "expected": [
+      {
+        "skill": "Python",
+        "priority": "required"
+      },
+      {
+        "skill": "FastAPI",
+        "priority": "required"
+      }
+    ]
+  },
+  {
+    "id": "preferred",
+    "text": "Preferred: Docker and AWS.",
+    "expected": [
+      {
+        "skill": "Docker",
+        "priority": "preferred"
+      },
+      {
+        "skill": "AWS",
+        "priority": "preferred"
+      }
+    ]
+  },
+  {
+    "id": "mention",
+    "text": "Our services use LangGraph.",
+    "expected": [
+      {
+        "skill": "LangGraph",
+        "priority": "unspecified"
+      }
+    ]
+  },
+  {
+    "id": "java-boundary",
+    "text": "JavaScript required.",
+    "expected": [
+      {
+        "skill": "JavaScript",
+        "priority": "required"
+      }
+    ]
+  },
+  {
+    "id": "no-known-skills",
+    "text": "Communicate clearly with stakeholders.",
+    "expected": []
+  },
+  {
+    "id": "mcp-alias",
+    "text": "Model Context Protocol experience is mandatory.",
+    "expected": [
+      {
+        "skill": "MCP",
+        "priority": "required"
+      }
+    ]
+  },
+  {
+    "id": "csharp",
+    "text": "C# is required.",
+    "expected": [
+      {
+        "skill": "C#",
+        "priority": "required"
+      }
+    ]
+  },
+  {
+    "id": "optional",
+    "text": "Kubernetes is optional.",
+    "expected": [
+      {
+        "skill": "Kubernetes",
+        "priority": "preferred"
+      }
+    ]
+  }
+]
