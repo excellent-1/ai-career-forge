@@ -22,8 +22,9 @@ function markdown(text){
   }
   closeList();return html;
 }
-const navItems=[...data.lessons.map(l=>({id:l.id,label:l.label})),{id:'practice',label:'Practice · 12 challenges'},{id:'analyzer',label:'Build · Analyzer demo'},{id:'portfolio',label:'Ship · Portfolio checklist'}];
+const navItems=[...data.lessons.map(l=>({id:l.id,label:l.label})),{id:'completed',label:'Run · Completed project'},{id:'practice',label:'Practice · 12 challenges'},{id:'analyzer',label:'Build · Analyzer demo'},{id:'portfolio',label:'Ship · Portfolio checklist'}];
 let current='mission';
+let lastLesson='mission';
 function renderNav(){
  $('nav').innerHTML=navItems.map((n,i)=>(i===9?'<div class="group">APPLY YOUR KNOWLEDGE</div>':'')+'<button type="button" data-go="'+n.id+'" '+(current===n.id?'aria-current="page" class="active"':'')+'>'+escapeHtml(n.label)+(state.completed.includes(n.id)?' ✓':'')+'</button>').join('');
  $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>go(b.dataset.go));
@@ -33,10 +34,11 @@ function renderNav(){
 function go(id){
  current=navItems.some(n=>n.id===id)?id:'mission';renderNav();
  const lesson=data.lessons.find(l=>l.id===current);
- if(lesson){$('workspace').innerHTML='<div class="eyebrow">'+escapeHtml(lesson.label)+'</div><h2>'+escapeHtml(lesson.title)+'</h2>'+markdown(lesson.body)+'<div class="actions"><button class="btn" id="mark">'+(state.completed.includes(current)?'Marked read ✓':'Mark section read')+'</button><button class="btn secondary" id="next">Next section →</button></div>';
+ if(lesson){lastLesson=current;$('workspace').innerHTML='<div class="eyebrow">'+escapeHtml(lesson.label)+'</div><h2>'+escapeHtml(lesson.title)+'</h2>'+markdown(lesson.body)+'<div class="actions"><button class="btn" id="mark">'+(state.completed.includes(current)?'Marked read ✓':'Mark section read')+'</button><button class="btn secondary" id="next">Next section →</button></div>';
   $('mark').onclick=()=>{if(!state.completed.includes(current))state.completed.push(current);save();go(current);};
   $('next').onclick=()=>{const index=navItems.findIndex(n=>n.id===current);go(navItems[(index+1)%navItems.length].id);};
- }else if(current==='practice') renderPractice();
+ }else if(current==='completed') renderAnalyzer(true);
+ else if(current==='practice') renderPractice();
  else if(current==='analyzer') renderAnalyzer();
  else renderPortfolio();
  $('workspace').focus({preventScroll:true});
@@ -64,18 +66,25 @@ function baseline(text){
  }
  return {mode:'rules-browser',requirements,limitations:['Keyword mentions are not proof of a hiring requirement.','Mixed priorities, heading scope, and negation require human review.','No model request was made. Use the Python project for live AI and hashed reports.']};
 }
-function renderAnalyzer(){
- $('workspace').innerHTML='<div class="eyebrow">Chapter project · browser demo</div><h2>Inspect the evidence.</h2><p>Paste a posting or try the fictional Plano example.</p><div class="note">Free deterministic baseline. This browser version uses keyword rules, not an LLM. The Python application includes the optional live AI adapter.</div><label for="posting">Job description</label><textarea id="posting" maxlength="20000"></textarea><div class="actions"><button class="btn" id="analyze">Analyze posting</button><button class="btn secondary" id="challenge">Try a failure case</button></div><div id="results" aria-live="polite"></div>';
+function renderAnalyzer(completed=false){
+ $('workspace').innerHTML=(completed?'<div class="eyebrow">Finished reference application · Chapter 1</div><h2>Job Requirements Analyzer</h2><p>This is the working browser edition students can build toward. A fictional posting has already been analyzed. Edit it and run again to explore.</p><div class="note">Free rules mode runs here without an API key. The Python project adds Pydantic validation, source hashing, and optional live AI. Previewing this example does not complete your exercises.</div>':'<div class="eyebrow">Chapter project · browser demo</div><h2>Inspect the evidence.</h2><p>Paste a posting or try the fictional Plano example.</p><div class="note">Free deterministic baseline. This browser version uses keyword rules, not an LLM. The Python application includes the optional live AI adapter.</div>')+'<label for="posting">Job description</label><textarea id="posting" maxlength="20000"></textarea><div class="actions"><button class="btn" id="analyze">Analyze posting</button><button class="btn secondary" id="load-example">Load chapter example</button><button class="btn secondary" id="challenge">Try a failure case</button></div><p class="fine">Input stays in this browser. No model request is made.</p><div id="results" aria-live="polite"></div>'+(completed?'<div class="actions"><button class="btn secondary" id="return-lesson">← Return to my lesson</button></div>':'');
  $('posting').value=data.sample;
+ $('load-example').onclick=()=>{$('posting').value=data.sample;$('analyze').click();};
  $('challenge').onclick=()=>{$('posting').value='Python is required, but Docker is preferred.';$('analyze').click();};
  $('analyze').onclick=()=>{
   const text=$('posting').value.trim();
   if(!text){$('results').textContent='Paste a job description before analyzing.';return;}
   if(text.length>20000){$('results').textContent='Use at most 20,000 characters.';return;}
   const result=baseline(text);
-  $('results').innerHTML='<h3>'+result.requirements.length+' skill mentions</h3>'+(result.requirements.length?'<table><thead><tr><th>Skill</th><th>Priority</th><th>Source evidence</th></tr></thead><tbody>'+result.requirements.map(r=>'<tr><td>'+escapeHtml(r.skill)+'</td><td>'+escapeHtml(r.priority)+'</td><td>'+escapeHtml(r.evidence)+'</td></tr>').join('')+'</tbody></table>':'<p>No known skills found. The registry may be incomplete.</p>')+'<p class="fine">Review priorities against the source. Missing salary, location, and years are not inferred. Export reflects this analysis; rerun after edits.</p><button id="export-result" class="btn secondary">Export browser report</button>';
+  const counts={required:0,preferred:0,unspecified:0};
+  result.requirements.forEach(r=>counts[r.priority]++);
+  $('results').innerHTML='<h3>'+result.requirements.length+' skill mentions</h3><p class="result-summary">'+counts.required+' required · '+counts.preferred+' preferred · '+counts.unspecified+' unspecified</p>'+(result.requirements.length?'<table><thead><tr><th>Skill</th><th>Priority</th><th>Source evidence</th></tr></thead><tbody>'+result.requirements.map(r=>'<tr><td>'+escapeHtml(r.skill)+'</td><td>'+escapeHtml(r.priority)+'</td><td>'+escapeHtml(r.evidence)+'</td></tr>').join('')+'</tbody></table>':'<p>No known skills found. The registry may be incomplete.</p>')+'<p class="fine">All displayed quotes occur in the input. This does not prove that each priority is correct. Salary, location, and years are not inferred. Re-run after editing.</p><details><summary>Inspect the JSON report</summary><pre><code>'+escapeHtml(JSON.stringify(result,null,2))+'</code></pre></details><div class="actions"><button id="export-result" class="btn secondary">Export browser report</button></div>';
   $('export-result').onclick=()=>download('browser-job-analysis.json',JSON.stringify(result,null,2));
  };
+ if(completed){
+   $('return-lesson').onclick=()=>go(lastLesson);
+   $('analyze').click();
+ }
 }
 function renderPortfolio(){
  const tasks=['Run Python tests and evaluation','Label an unseen posting before extraction','Document one failure and correction','Deploy the analyzer in rules mode','Publish source and setup instructions','Explain the provider boundary','Record whether live AI was tested','Record a two-minute demonstration'];
@@ -85,4 +94,5 @@ function renderPortfolio(){
  $('export-progress').onclick=()=>download('chapter-1-progress.json',JSON.stringify(state,null,2));
  $('reset-progress').onclick=()=>{if(confirm('Reset this browser’s chapter progress?')){state={completed:[],answers:{},portfolio:{}};save();go('portfolio');}};
 }
+$('run-completed').onclick=()=>go('completed');
 go('mission');

@@ -22,6 +22,8 @@ The browser baseline is **not an LLM**. Live AI requires server-side credentials
 
 Open [`web/index.html`](web/index.html) in a modern browser. Lessons and exercises work without Python or an API key. Fonts fall back to system fonts offline. Browser progress is local and exportable; short-answer practice does not execute arbitrary code or certify a skill.
 
+Click **Run completed Chapter 1 project** to launch the finished browser reference application at any point. It immediately analyzes the fictional chapter posting, shows priorities and source evidence, supports custom input, and exposes the JSON report for inspection/export. Use **Return to my lesson** to resume reading. Previewing the reference does not mark exercises complete. The Python app includes the same launch button and a dedicated Completed project workspace.
+
 Read the printable [Chapter 1 Markdown](docs/chapter-01.md), [curriculum roadmap](docs/CURRICULUM.md), and [assessment guide](docs/ASSESSMENT.md).
 
 ## Run the portfolio application

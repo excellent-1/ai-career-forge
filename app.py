@@ -11,10 +11,19 @@ CONTENT = json.loads((ROOT / 'content/chapter1.json').read_text())
 st.set_page_config(page_title='AI Career Forge · Chapter 1', page_icon='📖', layout='wide')
 st.sidebar.title('AI Career Forge')
 st.sidebar.caption('BUILD · VERIFY · DEPLOY')
-view = st.sidebar.radio('Workspace', ['Read chapter', 'Practice', 'Analyzer', 'Failure lab', 'Portfolio checklist'])
+view = st.sidebar.radio('Workspace', ['Read chapter', 'Completed project', 'Practice', 'Analyzer', 'Failure lab', 'Portfolio checklist'], key='workspace')
 st.sidebar.info('Chapter 1 is implemented. Later chapters and automated job matching are planned.')
 st.title('Build a Job Requirements Analyzer')
 st.caption('Chapter 1 · Working draft · Python / Pydantic / Structured outputs')
+
+
+def open_completed_project():
+    st.session_state.workspace = 'Completed project'
+    st.session_state.completed_input = CONTENT['sample']
+    st.session_state.completed_report = analyze_rules(CONTENT['sample']).model_dump()
+
+
+st.button('Run completed Chapter 1 project', key='launch_completed', on_click=open_completed_project)
 
 
 def setting(name):
@@ -52,34 +61,48 @@ elif view == 'Practice':
                     st.success(q['explanation'])
                 else:
                     st.warning('Try again. '+q['explanation'])
-elif view == 'Analyzer':
+elif view in ['Analyzer', 'Completed project']:
+    completed = view == 'Completed project'
+    report_key = 'completed_report' if completed else 'analysis_run'
+    input_key = 'completed_input' if completed else 'analyzer_input'
+    if completed:
+        st.subheader('Finished reference application')
+        st.write('Try the completed analyzer before building your own. The fictional chapter example is analyzed automatically. Edit the input and run it again.')
+        st.caption('Previewing this reference does not mark lessons, exercises, or portfolio tasks complete.')
+        if report_key not in st.session_state:
+            st.session_state[report_key] = analyze_rules(CONTENT['sample']).model_dump()
     st.info('Default mode is a deterministic keyword baseline, not a model. Review every classification.')
-    source = st.text_area('Job description', CONTENT['sample'], height=220, max_chars=20_000)
+    if input_key not in st.session_state:
+        st.session_state[input_key] = CONTENT['sample']
+    source = st.text_area('Job description', height=220, max_chars=20_000, key=input_key)
     live_enabled = setting('ENABLE_LIVE_AI').lower() == 'true'
     modes = ['Rules baseline'] + (['Live AI (uses paid API)'] if live_enabled else [])
     mode = st.selectbox('Extraction mode', modes)
     if not live_enabled:
         st.caption('Live AI is disabled. Private deployments can enable it with server-side settings; see docs/DEPLOYMENT.md.')
     consent = mode == 'Rules baseline' or st.checkbox('Send this posting to the configured model provider; usage may cost money.')
-    if st.button('Analyze posting', type='primary', disabled=not consent):
+    if st.button('Analyze posting', type='primary', disabled=not consent, key='analyze_posting'):
         # Clear previous results so a failed run cannot display stale output.
-        st.session_state.pop('analysis_run', None)
+        st.session_state.pop(report_key, None)
         try:
             with st.spinner('Analyzing…'):
                 run = analyze_rules(source) if mode == 'Rules baseline' else analyze_live(
                     source, api_key=setting('OPENAI_API_KEY'), model=setting('OPENAI_MODEL'))
-            st.session_state.analysis_run = run.model_dump()
+            st.session_state[report_key] = run.model_dump()
         except ValueError as error:
             st.error(str(error))
         except Exception:
             st.error('The model service did not complete the request. Check server configuration, model support, quota, or connectivity. No result was accepted.')
-    if 'analysis_run' in st.session_state:
-        run = st.session_state.analysis_run
+    if report_key in st.session_state:
+        run = st.session_state[report_key]
         st.subheader('Last successful report')
         st.caption('Results represent the input at analysis time. Re-run after editing.')
         for warning in run['warnings']:
             st.warning(warning)
         st.dataframe(run['analysis']['requirements'], width='stretch')
+        if completed:
+            with st.expander('Inspect the JSON report'):
+                st.json(run)
         for unknown in run['analysis']['unknowns']:
             st.write('• '+unknown)
         st.download_button('Download JSON report', json.dumps(run, indent=2),
